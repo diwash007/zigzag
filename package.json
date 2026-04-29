@@ -7,7 +7,7 @@
   "license": "AGPL-3.0-or-later",
   "description": "A 3D ZigZag game built with React Three Fiber.",
   "private": true,
-  "version": "2026.3.12.1",
+  "version": "2026.4.29.1",
   "type": "module",
   "scripts": {
     "dev": "vite --host",
@@ -18,6 +18,8 @@
     "prepare": "husky"
   },
   "dependencies": {
+    "@capacitor/android": "^8.3.0",
+    "@capacitor/core": "^8.3.0",
     "@react-three/drei": "^10.7.7",
     "@react-three/fiber": "^9.5.0",
     "r3f-perf": "^7.2.3",
@@ -27,6 +29,7 @@
     "zustand": "^5.0.11"
   },
   "devDependencies": {
+    "@capacitor/cli": "^8.3.0",
     "@eslint/js": "^10.0.1",
     "@types/node": "^25.4.0",
     "@types/react": "^19.2.14",
