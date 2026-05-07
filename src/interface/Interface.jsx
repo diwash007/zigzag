@@ -27,6 +27,7 @@ export default function Interface() {
   const [isNewBest, setIsNewBest] = useState(false);
   const [animateIntro, setAnimateIntro] = useState(false);
   const [animateGameOver, setAnimateGameOver] = useState(false);
+  const [showCredits, setShowCredits] = useState(false);
 
   useEffect(() => {
     if (score > bestScore && bestScore > 0 && !isNewBest) {
@@ -39,6 +40,7 @@ export default function Interface() {
       setIsNewBest(false);
       setAnimateIntro(true);
       setAnimateGameOver(false);
+      setShowCredits(false);
     } else if (phase === 'playing') {
       setAnimateIntro(false);
     } else if (phase === 'gameover') {
@@ -47,6 +49,12 @@ export default function Interface() {
   }, [phase]);
 
   const playPromptText = isMobile ? 'TAP TO PLAY' : 'CLICK TO PLAY';
+
+  const playUiClick = () => {
+    if (!sound) return;
+    uiSound.currentTime = 0;
+    uiSound.play();
+  };
 
   return (
     <div id="interface">
@@ -79,47 +87,89 @@ export default function Interface() {
               }
             }}
           />
-          <h1
+          {/* <h1
             id="title"
             className={`slide-item-intro-top${dark ? ' dark' : ''}`}
           >
-            ZIGZAG
-          </h1>
+            TAP & REGRET
+          </h1> */}
           <p
             id="play-prompt"
-            className={`slide-item-intro-top${dark ? ' dark' : ''}`}
+            className={`slide-item-intro-bottom${dark ? ' dark' : ''}`}
           >
             {playPromptText}
           </p>
-          <div id="intro-data-container" className="slide-item-intro-bottom">
-            <p className={`intro-data${dark ? ' dark' : ''}`}>
-              BEST SCORE: {bestScore}
-            </p>
-            <p className={`intro-data${dark ? ' dark' : ''}`}>
-              GAMES PLAYED: {gamesPlayed}
-            </p>
-          </div>
-          <div id="copyright" className="slide-item-intro-bottom">
-            <a
-              className={dark ? 'dark' : ''}
-              href="https://michaelkolesidis.com"
-              target="_blank"
-              rel="noopener noreferrer"
+              <p className={`intro-data${dark ? ' dark' : ''}`}>BEST SCORE: {bestScore}</p>
+              <p className={`intro-data${dark ? ' dark' : ''}`}>GAMES PLAYED: {gamesPlayed}</p>
+            {showCredits &&
+            <div
+              id="credits-panel"
+              className={`slide-item-intro-bottom ${dark ? 'dark-container' : ''}`}
             >
-              © Michael Kolesidis
-            </a>
-            <p className={dark ? 'dark' : ''}>
-              Licensed under AGPLv3 •{' '}
-              <a
-                className={dark ? 'dark' : ''}
-                href="https://github.com/michaelkolesidis/zigzag"
-                target="_blank"
-                rel="noopener noreferrer"
+              <p className={`credits-title`}>CREDITS</p>
+              <p className={`credits-line`}>
+                Original game by{' '}
+                <a
+                  className={dark ? 'dark' : ''}
+                  href="https://michaelkolesidis.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Michael Kolesidis
+                </a>
+              </p>
+              {/* <p className={`credits-line ${dark ? 'dark' : ''}`}>
+                This fork extends and improves gameplay and UI.
+              </p> */}
+              <p className={`credits-line `}>
+                Current source:{' '}
+                <a
+                  href="https://github.com/diwash007/zigzag"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  diwash007/zigzag
+                </a>
+                <br />
+                Original source:{' '}
+                <a
+                  href="https://github.com/michaelkolesidis/zigzag"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  michaelkolesidis/zigzag
+                </a>
+              </p>
+              <button
+                id="credits-back"
+                type="button"
+                className={`credits-button credits-back ${
+                  dark ? 'dark-gameover-button' : ''
+                }`}
+                onClick={() => {
+                  playUiClick();
+                  setShowCredits(false);
+                }}
               >
-                Source
-              </a>
-            </p>
-          </div>
+                BACK
+              </button>
+            </div>
+          }
+          {!showCredits && (
+            <button
+              id="credits-toggle"
+              type="button"
+              className={`credits-button credits-docked slide-item-intro-bottom ${
+                dark ? 'dark-gameover-button' : ''
+              }`}
+              onClick={() => {
+                playUiClick();
+                setShowCredits(true);
+              }}
+            >
+              CREDITS
+            </button>
+          )}
         </div>
       )}
 

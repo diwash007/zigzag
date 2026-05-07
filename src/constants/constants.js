@@ -20,13 +20,13 @@ export const UI_SOUND_VOLUME = 0.75;
 export const GRAVITY = 16;
 
 // Background
-export const BACKGROUND_COLOR = '#ffffff'; // light background color
-export const BACKGROUND_COLOR_DARK = '#222222'; // dark background color
+export const BACKGROUND_COLOR = '#f0f0f0'; // Off-white
+export const BACKGROUND_COLOR_DARK = '#0a0a0a'; // Near black
 
 // Level
 export const TILE_SIZE = 1.35; // length and width of each tile
 export const TILE_DEPTH = 4; // height of each tile
-export const TILE_COLOR = '#007acc'; // color of the tiles
+export const TILE_COLOR = '#007722'; // color of the tiles
 export const TILE_STATUS = {
   ACTIVE: 'active',
   FALLING: 'falling',

@@ -144,9 +144,12 @@ export default function Game() {
           // Ready Phase
           if (phase === 'ready') {
             if (
-              e.target.alt === 'Sound toggle' ||
-              e.target.alt === 'Dark toggle' ||
-              e.target.closest('#copyright')
+              e.type === 'pointerdown' &&
+              (e.target.alt === 'Sound toggle' ||
+                e.target.alt === 'Dark toggle' ||
+                e.target.closest('#credits-toggle') ||
+                e.target.closest('#credits-panel') ||
+                e.target.closest('#credits-back'))
             ) {
               return;
             }

@@ -47,21 +47,32 @@ export default function App() {
   }, []);
 
   return (
-    <>
-      <Interface className="dark" />
-      <Canvas
-        orthographic
-        camera={{
-          zoom: isMobile ? ZOOM_LEVEL_MOBILE : ZOOM_LEVEL_DESKTOP,
-          far: CAMERA_FAR,
-        }}
-      >
-        <color
-          attach="background"
-          args={[dark ? BACKGROUND_COLOR_DARK : BACKGROUND_COLOR]}
-        />
-        <Game />
-      </Canvas>
-    </>
+  <>
+  <Interface className="dark" />
+  <Canvas
+    shadows // Enable shadows for better tile depth!
+    orthographic
+    style={{ 
+      // This creates the gradient behind the transparent canvas
+      background: dark 
+        ? 'radial-gradient(circle, #353535 0%, #050505 100%)' 
+        : 'radial-gradient(circle, #ffffff 0%, #cfd9df 100%)' 
+    }}
+    camera={{
+      zoom: isMobile ? ZOOM_LEVEL_MOBILE : ZOOM_LEVEL_DESKTOP,
+      far: CAMERA_FAR,
+    }}
+  >
+    <color attach="background" args={[dark ? BACKGROUND_COLOR_DARK : BACKGROUND_COLOR]} />
+  
+  {/* Fog makes tiles in the distance blend into the background color */}
+  <fog 
+    attach="fog" 
+    args={[dark ? BACKGROUND_COLOR_DARK : BACKGROUND_COLOR, 20, 50]} 
+  />
+    {/* Remove the <color attach="background" /> line entirely */}
+    <Game />
+  </Canvas>
+</> 
   );
 }

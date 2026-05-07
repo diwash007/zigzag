@@ -1,20 +1,21 @@
 import * as THREE from 'three';
+import { useMemo } from 'react';
+import { RoundedBoxGeometry } from 'three/examples/jsm/geometries/RoundedBoxGeometry';
 import { TILE_SIZE, TILE_DEPTH, TILE_COLOR } from '../../constants/constants';
 
-// Geometries and Materials
-const boxGeometry = new THREE.BoxGeometry(TILE_SIZE, TILE_DEPTH, TILE_SIZE);
-const standardMaterial = new THREE.MeshStandardMaterial({ color: TILE_COLOR });
+const boxGeometry = new RoundedBoxGeometry(TILE_SIZE, TILE_DEPTH, TILE_SIZE, 4, 0.05);
+const standardMaterial = new THREE.MeshStandardMaterial({ 
+  color: TILE_COLOR,
+  roughness: 1 // Higher roughness = less "confusing" reflections
+});
 
 export default function Tile({ tileData, tileRef }) {
-  const { position, id, status } = tileData;
   return (
     <mesh
       ref={tileRef}
       geometry={boxGeometry}
       material={standardMaterial}
-      position={position}
-      userData={{ status: status, id: id }}
-    ></mesh>
+      position={tileData.position}
+    />
   );
 }
-Tile.displayName = 'Tile';
