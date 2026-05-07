@@ -4,4 +4,5 @@
     <string name="title_activity_main">Tap and Regret</string>
     <string name="package_name">com.gilobyte.tapregret</string>
     <string name="custom_url_scheme">com.gilobyte.tapregret</string>
+    <string name="admob_app_id">ca-app-pub-7505384960057687~3263277563</string>
 </resources>
