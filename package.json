@@ -7,7 +7,7 @@
   "license": "AGPL-3.0-or-later",
   "description": "A 3D ZigZag game built with React Three Fiber.",
   "private": true,
-  "version": "2026.5.7.1",
+  "version": "2026.5.7.2",
   "type": "module",
   "scripts": {
     "dev": "vite --host",
