@@ -149,6 +149,9 @@ export default function Interface() {
             >
               <p className={`credits-title`}>CREDITS</p>
               <p className={`credits-line`}>
+                Licensed under AGPLv3
+              </p>
+              <p className={`credits-line`}>
                 Original game by{' '}
                 <a
                   className={dark ? 'dark' : ''}

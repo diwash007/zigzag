@@ -1,4 +1,6 @@
 import { Canvas } from '@react-three/fiber';
+import { Capacitor } from '@capacitor/core';
+import { StatusBar } from '@capacitor/status-bar';
 import useGame from './stores/useGame';
 import Interface from './interface/Interface';
 import Game from './Game';
@@ -17,6 +19,20 @@ export default function App() {
   const { isMobile, dark } = useGame((state) => state);
 
   useEffect(() => {
+    const configureFullscreenOverlay = async () => {
+      if (Capacitor.getPlatform() !== 'android') return;
+
+      try {
+        await StatusBar.setOverlaysWebView({ overlay: true });
+        const info = await StatusBar.getInfo();
+        document.documentElement.style.setProperty('--safe-area-inset-top', `${info.height}px`);
+      } catch (error) {
+        console.error('Failed to enable status bar overlay:', error);
+      }
+    };
+
+    configureFullscreenOverlay();
+
     console.log(
       `%cVersion: ${__APP_VERSION__}`,
       'font-family: Arial, sans-serif; font-size: 16px; background-color: #000; color: #fff; font-weight: 600; padding: 2px 6px;',
@@ -56,11 +72,15 @@ export default function App() {
   <Canvas
     shadows // Enable shadows for better tile depth!
     orthographic
-    style={{ 
+    style={{
+      position: 'fixed',
+      inset: 0,
+      width: '100vw',
+      height: '100vh',
       // This creates the gradient behind the transparent canvas
-      background: dark 
-        ? 'radial-gradient(circle, #353535 0%, #050505 100%)' 
-        : 'radial-gradient(circle, #ffffff 0%, #cfd9df 100%)' 
+      background: dark
+        ? 'radial-gradient(circle, #353535 0%, #050505 100%)'
+        : 'radial-gradient(circle, #ffffff 0%, #cfd9df 100%)'
     }}
     camera={{
       zoom: isMobile ? ZOOM_LEVEL_MOBILE : ZOOM_LEVEL_DESKTOP,
