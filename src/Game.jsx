@@ -42,6 +42,8 @@ export default function Game() {
     phase,
     debug,
     setPhase,
+    setCanContinueRun,
+    setContinueRequested,
     addPoints,
     resetScore,
     directions,
@@ -87,9 +89,15 @@ export default function Game() {
   }, [camera]);
 
   // Game Reset Logic
-  const resetGame = useCallback(() => {
+  const resetGame = useCallback(({ preserveScore = false, keepContinue = false } = {}) => {
     setIsOnPlatform(true);
-    resetScore(0);
+    if (!preserveScore) {
+      resetScore(0);
+    }
+    if (!keepContinue) {
+      setCanContinueRun(true);
+    }
+    setContinueRequested(false);
     if (sphere.current) {
       sphere.current.position.set(0, SPHERE_RADIUS, 0);
       sphere.current.velocity = new THREE.Vector3(0, 0, 0);
@@ -103,12 +111,25 @@ export default function Game() {
     targetDirection.current = new THREE.Vector3(0, 0, -1);
 
     setupCamera();
-  }, [setupCamera, resetScore, setIsOnPlatform, setSpherePos]);
+  }, [
+    setupCamera,
+    resetScore,
+    setIsOnPlatform,
+    setSpherePos,
+    setCanContinueRun,
+    setContinueRequested,
+  ]);
 
   // Initial Setup
   useEffect(() => {
-    if (phase === 'gameover' || phase === 'playing') return;
-    resetGame();
+    if (phase === 'gameover' || phase === 'playing') {
+      return;
+    }
+    if (phase === 'continue') {
+      resetGame({ preserveScore: true, keepContinue: true });
+      return;
+    }
+    resetGame({ preserveScore: false, keepContinue: false });
   }, [resetGame, phase]);
 
   // Input Handling
@@ -161,6 +182,15 @@ export default function Game() {
             setGamesPlayed(gamesPlayed + 1);
             return;
           }
+          // Continue Phase
+          if (phase === 'continue') {
+            if (sound) {
+              uiSound.currentTime = 0;
+              uiSound.play();
+            }
+            setPhase('playing');
+            return;
+          }
           // Game Over Phase
           if (phase === 'gameover') {
             return;
@@ -210,7 +240,12 @@ export default function Game() {
     if (phase === 'ready') return;
 
     const spherePos = sphere.current?.position;
+    if (!spherePos) return;
     setSpherePos(spherePos);
+
+    if (phase === 'continue') {
+      return;
+    }
 
     // Gameplay Logic (Playing State)
     if (phase === 'playing') {

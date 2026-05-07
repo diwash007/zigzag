@@ -6,6 +6,7 @@ import SoundOn from '../assets/icons/sound-on.svg';
 import SoundOff from '../assets/icons/sound-off.svg';
 import Dark from '../assets/icons/dark.svg';
 import { UI_SOUND_VOLUME } from '../constants/constants';
+import { showContinueRewardedAd } from '../services/rewardedAd';
 
 // Sound effects
 const uiSound = new Audio('sounds/ui.mp3');
@@ -18,6 +19,9 @@ export default function Interface() {
     gamesPlayed,
     phase,
     setPhase,
+    canContinueRun,
+    setCanContinueRun,
+    setContinueRequested,
     isMobile,
     dark,
     toggleDark,
@@ -28,6 +32,8 @@ export default function Interface() {
   const [animateIntro, setAnimateIntro] = useState(false);
   const [animateGameOver, setAnimateGameOver] = useState(false);
   const [showCredits, setShowCredits] = useState(false);
+  const [isLoadingContinue, setIsLoadingContinue] = useState(false);
+  const [continueError, setContinueError] = useState('');
 
   useEffect(() => {
     if (score > bestScore && bestScore > 0 && !isNewBest) {
@@ -41,9 +47,12 @@ export default function Interface() {
       setAnimateIntro(true);
       setAnimateGameOver(false);
       setShowCredits(false);
+      setIsLoadingContinue(false);
+      setContinueError('');
     } else if (phase === 'playing') {
       setAnimateIntro(false);
-    } else if (phase === 'gameover') {
+      setContinueError('');
+    } else if (phase === 'gameover' || phase === 'continue') {
       setAnimateGameOver(true);
     }
   }, [phase]);
@@ -54,6 +63,38 @@ export default function Interface() {
     if (!sound) return;
     uiSound.currentTime = 0;
     uiSound.play();
+  };
+
+  const handleContinueRun = async () => {
+    if (
+      phase !== 'gameover' ||
+      !canContinueRun ||
+      isLoadingContinue
+    ) {
+      return;
+    }
+
+    setIsLoadingContinue(true);
+    setContinueError('');
+
+    try {
+      const rewarded = await showContinueRewardedAd();
+
+      if (!rewarded) {
+        setContinueError('Watch the full ad to continue.');
+        return;
+      }
+
+      setCanContinueRun(false);
+      setContinueRequested(true);
+      setAnimateGameOver(false);
+      setPhase('continue');
+    } catch (error) {
+      console.error('Failed to show rewarded ad:', error);
+      setContinueError('Rewarded ad unavailable. Please retry.');
+    } finally {
+      setIsLoadingContinue(false);
+    }
   };
 
   return (
@@ -234,6 +275,24 @@ export default function Interface() {
                 {bestScore}
               </p>
             </div>
+
+            {phase === 'gameover' && canContinueRun && (
+              <div
+                className={`slide-item-gameover ${
+                  dark ? 'dark-gameover-button' : ' '
+                } gameover-button`}
+                style={isLoadingContinue ? { opacity: 0.6 } : undefined}
+                onClick={handleContinueRun}
+              >
+                {isLoadingContinue ? 'LOADING AD...' : 'CONTINUE (AD)'}
+              </div>
+            )}
+
+            {phase === 'gameover' && continueError && (
+              <p className={`slide-item-gameover ${dark ? ' dark' : ''}`}>
+                {continueError}
+              </p>
+            )}
 
             <div
               className={`slide-item-gameover ${

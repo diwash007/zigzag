@@ -4,6 +4,7 @@ import Interface from './interface/Interface';
 import Game from './Game';
 import { fancyLog } from './utils/fancyLog';
 import { useEffect } from 'react';
+import { initializeRewardedAds } from './services/rewardedAd';
 import {
   ZOOM_LEVEL_DESKTOP,
   ZOOM_LEVEL_MOBILE,
@@ -39,6 +40,9 @@ export default function App() {
 
     // Fancy log message
     fancyLog();
+    initializeRewardedAds().catch((error) => {
+      console.error('Failed to initialize rewarded ads:', error);
+    });
 
     return () => {
       window.removeEventListener('hashchange', handleHashChange);

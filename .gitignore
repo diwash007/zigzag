@@ -24,3 +24,5 @@ dev-dist
 *.sln
 *.sw?
 Desktop.ini
+
+.env

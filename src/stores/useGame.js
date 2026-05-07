@@ -27,8 +27,12 @@ export default create(
       debug: window.location.hash === '#debug',
 
       // Phases
-      phase: 'ready', // ready, playing, gameover
+      phase: 'ready', // ready, playing, continue, gameover
       setPhase: (phase) => set({ phase }),
+      canContinueRun: true,
+      setCanContinueRun: (canContinueRun) => set({ canContinueRun }),
+      continueRequested: false,
+      setContinueRequested: (continueRequested) => set({ continueRequested }),
 
       // Directions
       directions: [
