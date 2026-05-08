@@ -6,7 +6,11 @@ import SoundOn from '../assets/icons/sound-on.svg';
 import SoundOff from '../assets/icons/sound-off.svg';
 import Dark from '../assets/icons/dark.svg';
 import { UI_SOUND_VOLUME } from '../constants/constants';
-import { showContinueRewardedAd } from '../services/rewardedAd';
+import {
+  preloadContinueRewardedAd,
+  showContinueRewardedAd,
+  subscribeContinueRewardedAdAvailability,
+} from '../services/rewardedAd';
 
 // Sound effects
 const uiSound = new Audio('sounds/ui.mp3');
@@ -33,6 +37,7 @@ export default function Interface() {
   const [animateGameOver, setAnimateGameOver] = useState(false);
   const [showCredits, setShowCredits] = useState(false);
   const [isLoadingContinue, setIsLoadingContinue] = useState(false);
+  const [isContinueAdReady, setIsContinueAdReady] = useState(false);
   const [continueError, setContinueError] = useState('');
 
   useEffect(() => {
@@ -40,6 +45,24 @@ export default function Interface() {
       setIsNewBest(true);
     }
   }, [score, bestScore]);
+
+  useEffect(() => {
+    const unsubscribe = subscribeContinueRewardedAdAvailability((available) => {
+      setIsContinueAdReady(available);
+    });
+
+    return () => {
+      unsubscribe();
+    };
+  }, []);
+
+  useEffect(() => {
+    if (phase !== 'playing') return;
+
+    preloadContinueRewardedAd().catch((error) => {
+      console.error('Failed to preload rewarded ad:', error);
+    });
+  }, [phase]);
 
   useEffect(() => {
     if (phase === 'ready') {
@@ -69,6 +92,7 @@ export default function Interface() {
     if (
       phase !== 'gameover' ||
       !canContinueRun ||
+      !isContinueAdReady ||
       isLoadingContinue
     ) {
       return;
@@ -280,15 +304,21 @@ export default function Interface() {
             </div>
 
             {phase === 'gameover' && canContinueRun && (
-              <div
+              <button
+                type="button"
                 className={`slide-item-gameover ${
                   dark ? 'dark-gameover-button' : ' '
                 } gameover-button`}
-                style={isLoadingContinue ? { opacity: 0.6 } : undefined}
+                style={isLoadingContinue || !isContinueAdReady ? { opacity: 0.6 } : undefined}
                 onClick={handleContinueRun}
+                disabled={!isContinueAdReady || isLoadingContinue}
               >
-                {isLoadingContinue ? 'LOADING AD...' : 'CONTINUE (AD)'}
-              </div>
+                {isLoadingContinue
+                  ? 'OPENING AD...'
+                  : isContinueAdReady
+                    ? 'CONTINUE (AD)'
+                    : 'PREPARING AD...'}
+              </button>
             )}
 
             {phase === 'gameover' && continueError && (

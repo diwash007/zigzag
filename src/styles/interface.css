@@ -328,6 +328,14 @@ h1 {
   transform: translateY(0);
 }
 
+.gameover-button:disabled {
+  cursor: not-allowed;
+}
+
+.gameover-button:disabled:hover {
+  transform: translateY(0);
+}
+
 /* Game over animation */
 .slide-item-gameover {
   opacity: 0;
