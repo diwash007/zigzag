@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import pkg from "../../package.json";
 import useGame from '../stores/useGame';
 import useSound from '../stores/useSound';
 import '../styles/interface.css';
@@ -166,6 +167,9 @@ export default function Interface() {
               className={`slide-item-intro-bottom ${dark ? 'dark-container' : ''}`}
             >
               <p className={`credits-title`}>CREDITS</p>
+              <p className={`credits-line`}>
+                v{pkg.version}
+              </p>
               <p className={`credits-line`}>
                 Licensed under AGPLv3
               </p>
