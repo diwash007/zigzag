@@ -6,6 +6,7 @@ import { Perf } from 'r3f-perf';
 // Stores
 import useGame from './stores/useGame';
 import useSound from './stores/useSound.js';
+import { playGameSound } from './services/audioContext.js';
 
 // Constants and Utilities
 import {
@@ -25,12 +26,6 @@ import {
 import Level from './level/Level.jsx';
 import Lights from './Lights.jsx';
 import Sphere from './Sphere.jsx';
-
-// Sound Effects
-const tapSound = new Audio('sounds/tap.mp3');
-const fallSound = new Audio('sounds/fall.mp3');
-const uiSound = new Audio('sounds/ui.mp3');
-uiSound.volume = UI_SOUND_VOLUME;
 
 export default function Game() {
   // Store
@@ -154,8 +149,7 @@ export default function Game() {
         // Playing Phase
         if (phase === 'playing' && isOnPlatform) {
           if (sound) {
-            tapSound.currentTime = 0;
-            tapSound.play();
+            playGameSound('tap');
           }
           directionIndex.current =
             (directionIndex.current + 1) % directions.length;
@@ -175,8 +169,7 @@ export default function Game() {
               return;
             }
             if (sound) {
-              uiSound.currentTime = 0;
-              uiSound.play();
+              playGameSound('ui', { volume: UI_SOUND_VOLUME });
             }
             setPhase('playing');
             setGamesPlayed(gamesPlayed + 1);
@@ -185,8 +178,7 @@ export default function Game() {
           // Continue Phase
           if (phase === 'continue') {
             if (sound) {
-              uiSound.currentTime = 0;
-              uiSound.play();
+              playGameSound('ui', { volume: UI_SOUND_VOLUME });
             }
             setPhase('playing');
             return;
@@ -277,8 +269,7 @@ export default function Game() {
         }
 
         if (sound) {
-          fallSound.currentTime = 0;
-          fallSound.play();
+          playGameSound('fall');
         }
         setPhase('gameover');
       }

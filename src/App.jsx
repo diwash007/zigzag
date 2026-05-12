@@ -7,6 +7,7 @@ import Game from './Game';
 import { fancyLog } from './utils/fancyLog';
 import { useEffect } from 'react';
 import { initializeRewardedAds } from './services/rewardedAd';
+import { preloadGameAudio, unlockGameAudio } from './services/audioContext';
 import {
   ZOOM_LEVEL_DESKTOP,
   ZOOM_LEVEL_MOBILE,
@@ -59,10 +60,24 @@ export default function App() {
     initializeRewardedAds().catch((error) => {
       console.error('Failed to initialize rewarded ads:', error);
     });
+    preloadGameAudio().catch((error) => {
+      console.error('Failed to preload game audio:', error);
+    });
+
+    const unlockAudio = () => {
+      unlockGameAudio().finally(() => {
+        window.removeEventListener('pointerdown', unlockAudio);
+        window.removeEventListener('keydown', unlockAudio);
+      });
+    };
+    window.addEventListener('pointerdown', unlockAudio);
+    window.addEventListener('keydown', unlockAudio);
 
     return () => {
       window.removeEventListener('hashchange', handleHashChange);
       document.removeEventListener('contextmenu', preventContextMenu);
+      window.removeEventListener('pointerdown', unlockAudio);
+      window.removeEventListener('keydown', unlockAudio);
     };
   }, []);
 

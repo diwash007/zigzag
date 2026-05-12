@@ -5,6 +5,7 @@ import * as THREE from 'three';
 // Stores
 import useGame from '../stores/useGame.js';
 import useSound from '../stores/useSound.js';
+import { playGameSound } from '../services/audioContext.js';
 
 // Constants and utilities
 import {
@@ -30,9 +31,6 @@ import createIdGenerator from '../utils/idGenerator.js';
 import Tile from './components/Tile.jsx';
 import Gem from './components/Gem.jsx';
 import FloatingText from './components/FloatingText.jsx';
-
-// Sound effects
-const gemSound = new Audio('sounds/gem.mp3');
 
 export default function Level() {
   // Store
@@ -309,8 +307,7 @@ export default function Level() {
             isOnPlatform
           ) {
             if (sound) {
-              gemSound.currentTime = 0;
-              gemSound.play();
+              playGameSound('gem');
             }
             addPoints(1); // add score for collecting a gem
             gemsToRemove.push(gem.id); // mark gem for removal

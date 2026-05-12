@@ -6,15 +6,12 @@ import SoundOn from '../assets/icons/sound-on.svg';
 import SoundOff from '../assets/icons/sound-off.svg';
 import Dark from '../assets/icons/dark.svg';
 import { UI_SOUND_VOLUME } from '../constants/constants';
+import { playGameSound } from '../services/audioContext';
 import {
   preloadContinueRewardedAd,
   showContinueRewardedAd,
   subscribeContinueRewardedAdAvailability,
 } from '../services/rewardedAd';
-
-// Sound effects
-const uiSound = new Audio('sounds/ui.mp3');
-uiSound.volume = UI_SOUND_VOLUME;
 
 export default function Interface() {
   const {
@@ -84,8 +81,7 @@ export default function Interface() {
 
   const playUiClick = () => {
     if (!sound) return;
-    uiSound.currentTime = 0;
-    uiSound.play();
+    playGameSound('ui', { volume: UI_SOUND_VOLUME });
   };
 
   const handleContinueRun = async () => {
@@ -134,8 +130,7 @@ export default function Interface() {
             onClick={() => {
               toggleSound();
               if (!sound) {
-                uiSound.currentTime = 0;
-                uiSound.play();
+                playGameSound('ui', { volume: UI_SOUND_VOLUME });
               }
             }}
           />
@@ -147,8 +142,7 @@ export default function Interface() {
             onClick={() => {
               toggleDark();
               if (sound) {
-                uiSound.currentTime = 0;
-                uiSound.play();
+                playGameSound('ui', { volume: UI_SOUND_VOLUME });
               }
             }}
           />
@@ -333,8 +327,7 @@ export default function Interface() {
               } gameover-button`}
               onClick={() => {
                 if (sound) {
-                  uiSound.currentTime = 0;
-                  uiSound.play();
+                  playGameSound('ui', { volume: UI_SOUND_VOLUME });
                 }
                 setPhase('ready');
               }}
