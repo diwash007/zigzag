@@ -1,0 +1,4 @@
+# Play Store service-account JSON key used by `supply`.
+# SUPPLY_JSON_KEY environment variable is used if set, falling back to gitignored play-store-key.json.
+json_key_file(ENV.fetch("SUPPLY_JSON_KEY", "fastlane/play-store-key.json"))
+package_name("com.gilobyte.tapregret")

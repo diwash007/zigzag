@@ -6,7 +6,7 @@ import Interface from './interface/Interface';
 import Game from './Game';
 import { fancyLog } from './utils/fancyLog';
 import { useEffect } from 'react';
-import { initializeRewardedAds } from './services/rewardedAd';
+import { initializeAds } from './services/adService';
 import { preloadGameAudio, unlockGameAudio } from './services/audioContext';
 import {
   ZOOM_LEVEL_DESKTOP,
@@ -57,8 +57,8 @@ export default function App() {
 
     // Fancy log message
     fancyLog();
-    initializeRewardedAds().catch((error) => {
-      console.error('Failed to initialize rewarded ads:', error);
+    initializeAds().catch((error) => {
+      console.error('Failed to initialize ads:', error);
     });
     preloadGameAudio().catch((error) => {
       console.error('Failed to preload game audio:', error);
@@ -102,14 +102,11 @@ export default function App() {
       far: CAMERA_FAR,
     }}
   >
-    <color attach="background" args={[dark ? BACKGROUND_COLOR_DARK : BACKGROUND_COLOR]} />
-  
-  {/* Fog makes tiles in the distance blend into the background color */}
-  <fog 
-    attach="fog" 
-    args={[dark ? BACKGROUND_COLOR_DARK : BACKGROUND_COLOR, 20, 50]} 
-  />
-    {/* Remove the <color attach="background" /> line entirely */}
+    {/* Fog makes tiles in the distance blend into the background color */}
+    <fog 
+      attach="fog" 
+      args={[dark ? BACKGROUND_COLOR_DARK : BACKGROUND_COLOR, 20, 50]} 
+    />
     <Game />
   </Canvas>
 </> 

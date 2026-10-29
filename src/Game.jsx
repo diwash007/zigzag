@@ -228,7 +228,7 @@ export default function Game() {
   ]);
 
   // Game Loop
-  useFrame((_, delta) => {
+  useFrame((state, delta) => {
     if (phase === 'ready') return;
 
     const spherePos = sphere.current?.position;
@@ -256,8 +256,8 @@ export default function Game() {
       // Camera Movement (only if sphere not falling)
       if (spherePos.y > OBJECT_REMOVAL_POSITION_Y) {
         const movementAverage = (spherePos.x - spherePos.z) / 2;
-        camera.position.x = -CAMERA_OFFSET_X + movementAverage;
-        camera.position.z = CAMERA_OFFSET_Z - movementAverage;
+        state.camera.position.x = -CAMERA_OFFSET_X + movementAverage;
+        state.camera.position.z = CAMERA_OFFSET_Z - movementAverage;
       }
 
       // Sphere Fall Detection

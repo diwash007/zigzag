@@ -1,5 +1,4 @@
 import * as THREE from 'three';
-import { useMemo } from 'react';
 import { RoundedBoxGeometry } from 'three/examples/jsm/geometries/RoundedBoxGeometry';
 import { TILE_SIZE, TILE_DEPTH, TILE_COLOR } from '../../constants/constants';
 

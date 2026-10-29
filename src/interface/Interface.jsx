@@ -12,7 +12,8 @@ import {
   preloadContinueRewardedAd,
   showContinueRewardedAd,
   subscribeContinueRewardedAdAvailability,
-} from '../services/rewardedAd';
+  checkAndShowGameOverInterstitial,
+} from '../services/adService';
 
 export default function Interface() {
   const {
@@ -42,7 +43,7 @@ export default function Interface() {
     if (score > bestScore && bestScore > 0 && !isNewBest) {
       setIsNewBest(true);
     }
-  }, [score, bestScore]);
+  }, [score, bestScore, isNewBest]);
 
   useEffect(() => {
     const unsubscribe = subscribeContinueRewardedAdAvailability((available) => {
@@ -83,6 +84,17 @@ export default function Interface() {
   const playUiClick = () => {
     if (!sound) return;
     playGameSound('ui', { volume: UI_SOUND_VOLUME });
+  };
+
+  const handleRetry = async () => {
+    if (sound) {
+      playGameSound('ui', { volume: UI_SOUND_VOLUME });
+    }
+    const wasContinued = !canContinueRun;
+    await checkAndShowGameOverInterstitial({ gamesPlayed, wasContinued }).catch((err) => {
+      console.warn('Interstitial ad check failed:', err);
+    });
+    setPhase('ready');
   };
 
   const handleContinueRun = async () => {
@@ -329,12 +341,7 @@ export default function Interface() {
               className={`slide-item-gameover ${
                 dark ? 'dark-gameover-button' : ' '
               } gameover-button`}
-              onClick={() => {
-                if (sound) {
-                  playGameSound('ui', { volume: UI_SOUND_VOLUME });
-                }
-                setPhase('ready');
-              }}
+              onClick={handleRetry}
             >
               RETRY
             </div>

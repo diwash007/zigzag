@@ -1,0 +1,38 @@
+default_platform(:android)
+
+platform :android do
+  desc "Build a signed release AAB (no upload). Run: cd android && fastlane build_internal"
+  lane :build_internal do
+    sh("cd ../.. && pnpm build && npx cap sync android")
+    gradle(task: "bundleRelease")
+    aab = lane_context[SharedValues::GRADLE_AAB_OUTPUT_PATH] || File.expand_path("../app/build/outputs/bundle/release/app-release.aab", __dir__)
+    UI.success("AAB built successfully at: #{aab}")
+  end
+
+  desc "Build a signed release AAB and upload it to the Play Store internal track."
+  lane :internal do
+    ensure_supply_key!
+    sh("cd ../.. && pnpm build && npx cap sync android")
+    gradle(task: "bundleRelease")
+    aab = lane_context[SharedValues::GRADLE_AAB_OUTPUT_PATH] || File.expand_path("../app/build/outputs/bundle/release/app-release.aab", __dir__)
+    UI.message("Uploading AAB to Google Play Store internal track: #{aab}")
+    supply(
+      track: "internal",
+      aab: aab,
+      skip_upload_apk: true,
+      skip_upload_metadata: true,
+      skip_upload_images: true,
+      skip_upload_screenshots: true,
+      skip_upload_changelogs: true
+    )
+  end
+
+  private_lane :ensure_supply_key! do
+    key_path = File.expand_path(ENV.fetch("SUPPLY_JSON_KEY", "fastlane/play-store-key.json"), __dir__ + "/..")
+    UI.user_error!(
+      "Play Store API key not found at #{key_path}.\n" \
+      "Please set the SUPPLY_JSON_KEY environment variable to the path of your Google Play service account JSON key,\n" \
+      "or place it at android/fastlane/play-store-key.json (gitignored)."
+    ) unless File.exist?(key_path)
+  end
+end

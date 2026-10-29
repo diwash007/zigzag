@@ -76,6 +76,10 @@ fastlane/Preview.html
 fastlane/screenshots
 fastlane/test_output
 fastlane/readme.md
+fastlane/README.md
+fastlane/*.json
+play-store-key.json
+*.json.enc
 
 # Version control
 vcs.xml
