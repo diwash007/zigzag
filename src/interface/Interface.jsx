@@ -337,14 +337,15 @@ export default function Interface() {
               </p>
             )}
 
-            <div
+            <button
+              type="button"
               className={`slide-item-gameover ${
                 dark ? 'dark-gameover-button' : ' '
               } gameover-button`}
               onClick={handleRetry}
             >
               RETRY
-            </div>
+            </button>
           </div>
         </div>
       )}
