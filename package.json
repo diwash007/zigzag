@@ -7,7 +7,7 @@
   "license": "AGPL-3.0-or-later",
   "description": "A 3D ZigZag game built with React Three Fiber.",
   "private": true,
-  "version": "2026.10.29.2",
+  "version": "2026.10.29.3",
   "type": "module",
   "scripts": {
     "dev": "vite --host",
@@ -18,7 +18,8 @@
     "prepare": "husky",
     "build:android": "pnpm build && npx cap sync android && cd android && ./gradlew bundleRelease",
     "fastlane:build": "cd android && fastlane build_internal",
-    "fastlane:internal": "cd android && fastlane internal"
+    "fastlane:internal": "cd android && fastlane internal",
+    "fastlane:production": "cd android && fastlane production"
   },
   "dependencies": {
     "@capacitor-community/admob": "^8.0.0",

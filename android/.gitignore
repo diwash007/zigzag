@@ -78,6 +78,7 @@ fastlane/test_output
 fastlane/readme.md
 fastlane/README.md
 fastlane/*.json
+fastlane/metadata
 play-store-key.json
 *.json.enc
 

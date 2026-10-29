@@ -27,6 +27,62 @@ platform :android do
     )
   end
 
+  desc "Build a signed release AAB and upload it to the Play Store production track."
+  lane :production do |options|
+    ensure_supply_key!
+    sh("cd ../.. && pnpm build && npx cap sync android")
+    gradle(task: "bundleRelease")
+    aab = lane_context[SharedValues::GRADLE_AAB_OUTPUT_PATH] || File.expand_path("../app/build/outputs/bundle/release/app-release.aab", __dir__)
+    UI.message("Uploading AAB to Google Play Store production track: #{aab}")
+
+    fastlane_dir = __dir__
+    props_file = File.expand_path("../gradle.properties", fastlane_dir)
+    version_code = File.read(props_file)[/VERSION_CODE=(\d+)/, 1]
+
+    notes = options[:notes] || "- Smooth 3D endless runner performance enhancements.\n- Fixed Game Over screen action buttons for high-score runs.\n- Enhanced reward and continuation flow.\n- Minor visual and stability improvements."
+    if version_code
+      changelog_dir = File.expand_path("metadata/android/en-US/changelogs", fastlane_dir)
+      FileUtils.mkdir_p(changelog_dir)
+      File.write("#{changelog_dir}/#{version_code}.txt", notes)
+    end
+
+    supply(
+      track: "production",
+      aab: aab,
+      skip_upload_apk: true,
+      skip_upload_metadata: true,
+      skip_upload_images: true,
+      skip_upload_screenshots: true,
+      skip_upload_changelogs: false
+    )
+  end
+
+  desc "Promote internal track release to the Play Store production track."
+  lane :promote_to_production do |options|
+    ensure_supply_key!
+    fastlane_dir = __dir__
+    props_file = File.expand_path("../gradle.properties", fastlane_dir)
+    version_code = File.read(props_file)[/VERSION_CODE=(\d+)/, 1] || "11"
+
+    notes = options[:notes] || "- Smooth 3D endless runner performance enhancements.\n- Fixed Game Over screen action buttons for high-score runs.\n- Enhanced reward and continuation flow.\n- Minor visual and stability improvements."
+    changelog_dir = File.expand_path("metadata/android/en-US/changelogs", fastlane_dir)
+    FileUtils.mkdir_p(changelog_dir)
+    File.write("#{changelog_dir}/#{version_code}.txt", notes)
+
+    supply(
+      track: "internal",
+      track_promote_to: "production",
+      track_promote_release_status: "completed",
+      version_code: version_code.to_i,
+      skip_upload_aab: true,
+      skip_upload_apk: true,
+      skip_upload_metadata: true,
+      skip_upload_images: true,
+      skip_upload_screenshots: true,
+      skip_upload_changelogs: false
+    )
+  end
+
   private_lane :ensure_supply_key! do
     key_path = File.expand_path(ENV.fetch("SUPPLY_JSON_KEY", "fastlane/play-store-key.json"), __dir__ + "/..")
     UI.user_error!(
