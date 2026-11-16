@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import * as THREE from 'three';
 import {
   GEM_RADIUS,
@@ -23,7 +24,7 @@ const gemMaterial = new THREE.MeshStandardMaterial({
   roughness: GEM_ROUGHNESS,
 });
 
-export default function Gem({ gemData, gemRef }) {
+function Gem({ gemData, gemRef }) {
   const { position, id, tileId } = gemData;
   return (
     <group
@@ -44,3 +45,5 @@ export default function Gem({ gemData, gemRef }) {
     </group>
   );
 }
+
+export default memo(Gem);

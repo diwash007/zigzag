@@ -26,7 +26,16 @@ export const BACKGROUND_COLOR_DARK = '#0a0a0a'; // Near black
 // Level
 export const TILE_SIZE = 1.35; // length and width of each tile
 export const TILE_DEPTH = 4; // height of each tile
-export const TILE_COLOR = '#007722'; // color of the tiles
+export const TILE_COLOR = '#007722'; // base color of the tiles
+export const THEME_PALETTES = [
+  { threshold: 0, color: '#007722' },   // Emerald Green
+  { threshold: 20, color: '#0066cc' },  // Sapphire Blue
+  { threshold: 40, color: '#7b1fa2' },  // Amethyst Purple
+  { threshold: 65, color: '#e65100' },  // Sunset Amber
+  { threshold: 90, color: '#00838f' },  // Ocean Cyan
+  { threshold: 120, color: '#c2185b' }, // Neon Rose
+  { threshold: 160, color: '#e5a00d' }, // Golden Champion
+];
 export const TILE_STATUS = {
   ACTIVE: 'active',
   FALLING: 'falling',
@@ -48,7 +57,7 @@ export const SPHERE_SEGMENTS = 32;
 export const SPHERE_COLOR = '#888888';
 export const SPHERE_COLOR_DARK = '#bbbbbb';
 export const SPHERE_METALNESS = 1;
-export const SPHERE_ROUGHNESS = 0.7;
+export const SPHERE_ROUGHNESS = 0.35;
 
 // Gems
 export const GEM_RADIUS = 0.35;

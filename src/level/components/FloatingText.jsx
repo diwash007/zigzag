@@ -1,4 +1,4 @@
-import { useRef } from 'react';
+import { useRef, memo } from 'react';
 import { useFrame } from '@react-three/fiber';
 import { Text, Billboard } from '@react-three/drei';
 import useGame from '../../stores/useGame';
@@ -10,7 +10,7 @@ import {
   FLOATING_TEXT_OPACITY,
 } from '../../constants/constants';
 
-export default function FloatingText({ position, content, onComplete }) {
+function FloatingText({ position, content, color, fontSize, onComplete }) {
   const text = useRef();
   const lifetime = useRef(0);
   const { dark } = useGame((state) => state);
@@ -31,13 +31,16 @@ export default function FloatingText({ position, content, onComplete }) {
     }
   });
 
+  const resolvedColor = color || (dark ? FLOATING_TEXT_COLOR_DARK : FLOATING_TEXT_COLOR);
+  const resolvedSize = fontSize || FLOATING_TEXT_FONT_SIZE;
+
   return (
     <Billboard position={position}>
       <Text
         ref={text}
-        fontSize={FLOATING_TEXT_FONT_SIZE}
+        fontSize={resolvedSize}
         fontWeight={FLOATING_TEXT_FONT_WEIGHT}
-        color={dark ? FLOATING_TEXT_COLOR_DARK : FLOATING_TEXT_COLOR}
+        color={resolvedColor}
         anchorX="center"
         anchorY="middle"
         material-toneMapped={false}
@@ -49,3 +52,5 @@ export default function FloatingText({ position, content, onComplete }) {
     </Billboard>
   );
 }
+
+export default memo(FloatingText);

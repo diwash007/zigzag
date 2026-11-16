@@ -19,6 +19,8 @@ export default function Interface() {
   const {
     score,
     bestScore,
+    totalGems,
+    runGems,
     gamesPlayed,
     phase,
     setPhase,
@@ -172,6 +174,7 @@ export default function Interface() {
             {playPromptText}
           </p>
               <p className={`intro-data${dark ? ' dark' : ''}`}>BEST SCORE: {bestScore}</p>
+              <p className={`intro-data${dark ? ' dark' : ''}`}>GEMS: {totalGems} 💎</p>
               <p className={`intro-data${dark ? ' dark' : ''}`}>GAMES PLAYED: {gamesPlayed}</p>
             {showCredits &&
             <div
@@ -310,6 +313,18 @@ export default function Interface() {
                 style={isNewBest ? { color: '#ffffff' } : {}}
               >
                 {bestScore}
+              </p>
+              <p
+                className={`gameover-score-title ${dark ? ' dark' : ''}`}
+                style={isNewBest ? { color: '#ffffff' } : {}}
+              >
+                GEMS COLLECTED
+              </p>
+              <p
+                className={`gameover-score ${dark ? ' dark' : ''}`}
+                style={isNewBest ? { color: '#ffffff' } : {}}
+              >
+                +{runGems} 💎 ({totalGems})
               </p>
             </div>
 

@@ -6,6 +6,7 @@ import * as THREE from 'three';
 import useGame from '../stores/useGame.js';
 import useSound from '../stores/useSound.js';
 import { playGameSound } from '../services/audioContext.js';
+import { hapticGem } from '../services/haptics.js';
 
 // Constants and utilities
 import {
@@ -24,18 +25,23 @@ import {
   GEM_SPAWN_PROBABILITY,
   GEM_HEIGHT_OFFSET,
   GRAVITY,
+  THEME_PALETTES,
+  TILE_COLOR,
 } from '../constants/constants.js';
 import createIdGenerator from '../utils/idGenerator.js';
 
 // Components
 import Tile from './components/Tile.jsx';
+import { tileStandardMaterial } from './components/tileMaterial.js';
 import Gem from './components/Gem.jsx';
 import FloatingText from './components/FloatingText.jsx';
 
 export default function Level() {
   // Store
   const {
+    score,
     addPoints,
+    addGems,
     phase,
     debug,
     directions,
@@ -50,6 +56,9 @@ export default function Level() {
     setFloatingTexts,
   } = useGame((state) => state);
   const { sound } = useSound((state) => state);
+
+  // Dynamic Theme Color Target
+  const targetColorRef = useRef(new THREE.Color(TILE_COLOR));
 
   // Create ID generators for tiles and gems
   const tileIdGenerator = useMemo(() => createIdGenerator(), []);
@@ -176,6 +185,7 @@ export default function Level() {
     setTiles([]);
     setGems([]);
     setIsOnPlatform(true);
+    tileStandardMaterial.color.set(TILE_COLOR);
 
     divergenceX.current = 0;
     divergenceZ.current = 0;
@@ -209,6 +219,17 @@ export default function Level() {
     if (phase === 'ready') {
       return;
     }
+
+    // Dynamic Zone Themes: smoothly transition tile color to current score palette
+    let targetHex = THEME_PALETTES[0].color;
+    for (let i = THEME_PALETTES.length - 1; i >= 0; i--) {
+      if (score >= THEME_PALETTES[i].threshold) {
+        targetHex = THEME_PALETTES[i].color;
+        break;
+      }
+    }
+    targetColorRef.current.set(targetHex);
+    tileStandardMaterial.color.lerp(targetColorRef.current, delta * 3.5);
 
     if (phase === 'playing' || phase === 'gameover') {
       const tilesToRemove = [];
@@ -309,12 +330,15 @@ export default function Level() {
             if (sound) {
               playGameSound('gem');
             }
+            hapticGem();
             addPoints(1); // add score for collecting a gem
+            addGems(1); // add to lifetime gem wallet
             gemsToRemove.push(gem.id); // mark gem for removal
 
             const newFloatingText = {
               id: floatingTextIdGenerator.generate(),
               position: gemPos.clone(),
+              content: '+1',
             };
             setFloatingTexts((prevFloatingTexts) => [
               ...prevFloatingTexts,
@@ -434,7 +458,9 @@ export default function Level() {
         <FloatingText
           key={text.id}
           position={text.position}
-          content="+1"
+          content={text.content || '+1'}
+          color={text.color}
+          fontSize={text.fontSize}
           onComplete={() => {
             setFloatingTexts((prev) => prev.filter((t) => t.id !== text.id));
           }}

@@ -94,6 +94,20 @@ export default create(
         setLocalStorage('bestScore', 0);
       },
 
+      // Gems wallet
+      totalGems: getLocalStorage('totalGems') ?? 0,
+      runGems: 0,
+      addGems: (count = 1) =>
+        set((state) => {
+          const newTotal = (state.totalGems || 0) + count;
+          setLocalStorage('totalGems', newTotal);
+          return {
+            totalGems: newTotal,
+            runGems: state.runGems + count,
+          };
+        }),
+      resetRunGems: () => set({ runGems: 0 }),
+
       // Games played
       gamesPlayed: getLocalStorage('gamesPlayed') ?? 0,
       setGamesPlayed: (gamesPlayed) => {
