@@ -1,4 +1,4 @@
-import { useRef, useEffect, useCallback, useMemo } from 'react';
+import { useRef, useEffect, useCallback } from 'react';
 import { useFrame, useThree } from '@react-three/fiber';
 import * as THREE from 'three';
 import { Perf } from 'r3f-perf';
@@ -7,8 +7,7 @@ import { Perf } from 'r3f-perf';
 import useGame from './stores/useGame';
 import useSound from './stores/useSound.js';
 import { playGameSound } from './services/audioContext.js';
-import { hapticTap, hapticFall, hapticNewBest } from './services/haptics.js';
-import createIdGenerator from './utils/idGenerator.js';
+import { hapticFall } from './services/haptics.js';
 
 // Constants and Utilities
 import {
@@ -44,7 +43,6 @@ export default function Game() {
     addPoints,
     resetScore,
     resetRunGems,
-    setFloatingTexts,
     directions,
     performance,
     togglePerformance,
@@ -55,11 +53,6 @@ export default function Game() {
     setBestScore,
   } = useGame((state) => state);
   const { sound, toggleSound } = useSound((state) => state);
-
-  // Milestone announcements
-  const milestoneIdGen = useMemo(() => createIdGenerator(), []);
-  const celebratedMilestones = useRef(new Set());
-  const celebratedNewBest = useRef(false);
 
   // Camera
   const { camera } = useThree();
@@ -98,8 +91,6 @@ export default function Game() {
     if (!preserveScore) {
       resetScore(0);
       resetRunGems();
-      celebratedMilestones.current.clear();
-      celebratedNewBest.current = false;
     }
     if (!keepContinue) {
       setCanContinueRun(true);
@@ -107,7 +98,6 @@ export default function Game() {
     setContinueRequested(false);
     if (sphere.current) {
       sphere.current.position.set(0, SPHERE_RADIUS, 0);
-      sphere.current.rotation.set(0, 0, 0);
       sphere.current.velocity = new THREE.Vector3(0, 0, 0);
     }
 
@@ -165,7 +155,6 @@ export default function Game() {
           if (sound) {
             playGameSound('tap');
           }
-          hapticTap();
           directionIndex.current =
             (directionIndex.current + 1) % directions.length;
           targetDirection.current.copy(directions[directionIndex.current]);
@@ -267,54 +256,6 @@ export default function Game() {
         speed.current + SPEED_INCREMENT * delta,
         SPEED_LIMIT,
       );
-
-      // Physical Sphere Rolling Animation
-      const rollDist = speed.current * delta;
-      const rollAngle = rollDist / SPHERE_RADIUS;
-      const rollAxis = new THREE.Vector3(0, 1, 0)
-        .cross(currentDirection.current)
-        .normalize();
-      sphere.current?.rotateOnWorldAxis(rollAxis, rollAngle);
-
-      // Milestone & High Score Celebrations
-      if (bestScore >= 5 && score > bestScore && !celebratedNewBest.current) {
-        celebratedNewBest.current = true;
-        hapticNewBest();
-        setFloatingTexts((prev) => [
-          ...prev,
-          {
-            id: milestoneIdGen.generate(),
-            position: spherePos.clone().add(new THREE.Vector3(0, 0.45, 0)),
-            content: 'NEW BEST!',
-            color: '#ffd700',
-            fontSize: 0.65,
-          },
-        ]);
-      }
-
-      const MILESTONE_CHEERS = [
-        { threshold: 25, label: '25! NICE!' },
-        { threshold: 50, label: '50! ON FIRE!' },
-        { threshold: 100, label: '100! UNSTOPPABLE!' },
-        { threshold: 150, label: '150! LEGENDARY!' },
-        { threshold: 200, label: '200! GODLIKE!' },
-      ];
-      for (const m of MILESTONE_CHEERS) {
-        if (score >= m.threshold && !celebratedMilestones.current.has(m.threshold)) {
-          celebratedMilestones.current.add(m.threshold);
-          setFloatingTexts((prev) => [
-            ...prev,
-            {
-              id: milestoneIdGen.generate(),
-              position: spherePos.clone().add(new THREE.Vector3(0, 0.45, 0)),
-              content: m.label,
-              color: '#00e5ff',
-              fontSize: 0.58,
-            },
-          ]);
-          break;
-        }
-      }
 
       // Camera Movement (only if sphere not falling)
       if (spherePos.y > OBJECT_REMOVAL_POSITION_Y) {

@@ -57,7 +57,7 @@ export const SPHERE_SEGMENTS = 32;
 export const SPHERE_COLOR = '#888888';
 export const SPHERE_COLOR_DARK = '#bbbbbb';
 export const SPHERE_METALNESS = 1;
-export const SPHERE_ROUGHNESS = 0.35;
+export const SPHERE_ROUGHNESS = 0.7;
 
 // Gems
 export const GEM_RADIUS = 0.35;

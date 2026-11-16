@@ -39,7 +39,6 @@ import FloatingText from './components/FloatingText.jsx';
 export default function Level() {
   // Store
   const {
-    score,
     addPoints,
     addGems,
     phase,
@@ -57,8 +56,8 @@ export default function Level() {
   } = useGame((state) => state);
   const { sound } = useSound((state) => state);
 
-  // Dynamic Theme Color Target
-  const targetColorRef = useRef(new THREE.Color(TILE_COLOR));
+  // Dynamic Theme Tier
+  const currentThemeTierRef = useRef(0);
 
   // Create ID generators for tiles and gems
   const tileIdGenerator = useMemo(() => createIdGenerator(), []);
@@ -185,6 +184,7 @@ export default function Level() {
     setTiles([]);
     setGems([]);
     setIsOnPlatform(true);
+    currentThemeTierRef.current = 0;
     tileStandardMaterial.color.set(TILE_COLOR);
 
     divergenceX.current = 0;
@@ -220,16 +220,19 @@ export default function Level() {
       return;
     }
 
-    // Dynamic Zone Themes: smoothly transition tile color to current score palette
-    let targetHex = THEME_PALETTES[0].color;
+    // Dynamic Zone Themes: update material color only when entering a new score tier
+    const currentScore = useGame.getState().score;
+    let newTier = 0;
     for (let i = THEME_PALETTES.length - 1; i >= 0; i--) {
-      if (score >= THEME_PALETTES[i].threshold) {
-        targetHex = THEME_PALETTES[i].color;
+      if (currentScore >= THEME_PALETTES[i].threshold) {
+        newTier = i;
         break;
       }
     }
-    targetColorRef.current.set(targetHex);
-    tileStandardMaterial.color.lerp(targetColorRef.current, delta * 3.5);
+    if (newTier !== currentThemeTierRef.current) {
+      currentThemeTierRef.current = newTier;
+      tileStandardMaterial.color.set(THEME_PALETTES[newTier].color);
+    }
 
     if (phase === 'playing' || phase === 'gameover') {
       const tilesToRemove = [];
