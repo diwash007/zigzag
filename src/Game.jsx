@@ -168,7 +168,11 @@ export default function Game() {
                 e.target.alt === 'Dark toggle' ||
                 e.target.closest('#credits-toggle') ||
                 e.target.closest('#credits-panel') ||
-                e.target.closest('#credits-back'))
+                e.target.closest('#credits-back') ||
+                e.target.closest('#shop-toggle') ||
+                e.target.closest('#gems-data') ||
+                e.target.closest('#shop-overlay') ||
+                e.target.closest('#shop-modal'))
             ) {
               return;
             }

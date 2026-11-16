@@ -8,6 +8,8 @@ import SoundOff from '../assets/icons/sound-off.svg';
 import Dark from '../assets/icons/dark.svg';
 import { UI_SOUND_VOLUME } from '../constants/constants';
 import { playGameSound } from '../services/audioContext';
+import { hapticGem } from '../services/haptics';
+import ShopModal from './ShopModal';
 import {
   preloadContinueRewardedAd,
   showContinueRewardedAd,
@@ -21,6 +23,8 @@ export default function Interface() {
     bestScore,
     totalGems,
     runGems,
+    hasDoubledGems,
+    doubleRunGems,
     gamesPlayed,
     phase,
     setPhase,
@@ -37,9 +41,12 @@ export default function Interface() {
   const [animateIntro, setAnimateIntro] = useState(false);
   const [animateGameOver, setAnimateGameOver] = useState(false);
   const [showCredits, setShowCredits] = useState(false);
+  const [showShop, setShowShop] = useState(false);
   const [isLoadingContinue, setIsLoadingContinue] = useState(false);
+  const [isLoadingDoubleGems, setIsLoadingDoubleGems] = useState(false);
   const [isContinueAdReady, setIsContinueAdReady] = useState(false);
   const [continueError, setContinueError] = useState('');
+  const [doubleGemsError, setDoubleGemsError] = useState('');
 
   useEffect(() => {
     if (score > bestScore && bestScore > 0 && !isNewBest) {
@@ -72,10 +79,13 @@ export default function Interface() {
       setAnimateGameOver(false);
       setShowCredits(false);
       setIsLoadingContinue(false);
+      setIsLoadingDoubleGems(false);
       setContinueError('');
+      setDoubleGemsError('');
     } else if (phase === 'playing') {
       setAnimateIntro(false);
       setContinueError('');
+      setDoubleGemsError('');
     } else if (phase === 'gameover' || phase === 'continue') {
       setAnimateGameOver(true);
     }
@@ -97,6 +107,40 @@ export default function Interface() {
       console.warn('Interstitial ad check failed:', err);
     });
     setPhase('ready');
+  };
+
+  const handleDoubleGems = async () => {
+    if (
+      phase !== 'gameover' ||
+      runGems <= 0 ||
+      hasDoubledGems ||
+      isLoadingDoubleGems ||
+      !isContinueAdReady
+    ) {
+      return;
+    }
+
+    setIsLoadingDoubleGems(true);
+    setDoubleGemsError('');
+
+    try {
+      const rewarded = await showContinueRewardedAd();
+      if (!rewarded) {
+        setDoubleGemsError('Watch full ad to claim 2x gems.');
+        return;
+      }
+
+      doubleRunGems();
+      hapticGem();
+      if (sound) {
+        playGameSound('gem');
+      }
+    } catch (error) {
+      console.error('Failed to show rewarded ad for gems:', error);
+      setDoubleGemsError('Rewarded ad unavailable. Please retry.');
+    } finally {
+      setIsLoadingDoubleGems(false);
+    }
   };
 
   const handleContinueRun = async () => {
@@ -174,7 +218,17 @@ export default function Interface() {
             {playPromptText}
           </p>
               <p className={`intro-data${dark ? ' dark' : ''}`}>BEST SCORE: {bestScore}</p>
-              <p className={`intro-data${dark ? ' dark' : ''}`}>GEMS: {totalGems} 💎</p>
+              <p
+                id="gems-data"
+                className={`intro-data${dark ? ' dark' : ''}`}
+                style={{ cursor: 'pointer', pointerEvents: 'auto' }}
+                onClick={() => {
+                  playUiClick();
+                  setShowShop(true);
+                }}
+              >
+                GEMS: {totalGems} 💎
+              </p>
               <p className={`intro-data${dark ? ' dark' : ''}`}>GAMES PLAYED: {gamesPlayed}</p>
             {showCredits &&
             <div
@@ -237,19 +291,34 @@ export default function Interface() {
             </div>
           }
           {!showCredits && (
-            <button
-              id="credits-toggle"
-              type="button"
-              className={`credits-button credits-docked slide-item-intro-bottom ${
-                dark ? 'dark-gameover-button' : ''
-              }`}
-              onClick={() => {
-                playUiClick();
-                setShowCredits(true);
-              }}
-            >
-              CREDITS
-            </button>
+            <div className="intro-actions slide-item-intro-bottom">
+              <button
+                id="shop-toggle"
+                type="button"
+                className={`credits-button ${
+                  dark ? 'dark-gameover-button' : ''
+                }`}
+                onClick={() => {
+                  playUiClick();
+                  setShowShop(true);
+                }}
+              >
+                SKINS 💎
+              </button>
+              <button
+                id="credits-toggle"
+                type="button"
+                className={`credits-button ${
+                  dark ? 'dark-gameover-button' : ''
+                }`}
+                onClick={() => {
+                  playUiClick();
+                  setShowCredits(true);
+                }}
+              >
+                CREDITS
+              </button>
+            </div>
           )}
         </div>
       )}
@@ -346,6 +415,34 @@ export default function Interface() {
               </button>
             )}
 
+            {phase === 'gameover' && runGems > 0 && (
+              <button
+                type="button"
+                className={`slide-item-gameover ${
+                  dark ? 'dark-gameover-button' : ' '
+                } gameover-button gameover-double-gems`}
+                style={
+                  isLoadingDoubleGems || !isContinueAdReady || hasDoubledGems
+                    ? { opacity: hasDoubledGems ? 0.8 : 0.6 }
+                    : undefined
+                }
+                onClick={handleDoubleGems}
+                disabled={!isContinueAdReady || isLoadingDoubleGems || hasDoubledGems}
+              >
+                {hasDoubledGems
+                  ? '✓ 2X GEMS CLAIMED!'
+                  : isLoadingDoubleGems
+                    ? 'OPENING AD...'
+                    : `💎 2X GEMS (+${runGems})`}
+              </button>
+            )}
+
+            {phase === 'gameover' && doubleGemsError && (
+              <p className={`slide-item-gameover ${dark ? ' dark' : ''}`}>
+                {doubleGemsError}
+              </p>
+            )}
+
             {phase === 'gameover' && continueError && (
               <p className={`slide-item-gameover ${dark ? ' dark' : ''}`}>
                 {continueError}
@@ -364,6 +461,8 @@ export default function Interface() {
           </div>
         </div>
       )}
+
+      {showShop && <ShopModal onClose={() => setShowShop(false)} />}
     </div>
   );
 }

@@ -3,6 +3,7 @@ import { subscribeWithSelector } from 'zustand/middleware';
 import * as THREE from 'three';
 import { getLocalStorage, setLocalStorage } from './utils';
 import { SPHERE_RADIUS } from '../constants/constants';
+import { SKINS_MAP } from '../constants/skins';
 
 export default create(
   subscribeWithSelector((set) => {
@@ -94,9 +95,10 @@ export default create(
         setLocalStorage('bestScore', 0);
       },
 
-      // Gems wallet
+      // Gems wallet & Monetization
       totalGems: getLocalStorage('totalGems') ?? 0,
       runGems: 0,
+      hasDoubledGems: false,
       addGems: (count = 1) =>
         set((state) => {
           const newTotal = (state.totalGems || 0) + count;
@@ -106,7 +108,51 @@ export default create(
             runGems: state.runGems + count,
           };
         }),
-      resetRunGems: () => set({ runGems: 0 }),
+      resetRunGems: () => set({ runGems: 0, hasDoubledGems: false }),
+      doubleRunGems: () =>
+        set((state) => {
+          if (state.hasDoubledGems || state.runGems <= 0) return {};
+          const bonus = state.runGems;
+          const newTotal = (state.totalGems || 0) + bonus;
+          setLocalStorage('totalGems', newTotal);
+          return {
+            totalGems: newTotal,
+            runGems: state.runGems * 2,
+            hasDoubledGems: true,
+          };
+        }),
+
+      // Skins customization
+      unlockedSkins: getLocalStorage('unlockedSkins') ?? ['classic'],
+      selectedSkin: getLocalStorage('selectedSkin') ?? 'classic',
+      unlockSkin: (skinId) => {
+        const skin = SKINS_MAP[skinId];
+        if (!skin) return false;
+        let success = false;
+        set((state) => {
+          if (state.unlockedSkins.includes(skinId)) return {};
+          if (state.totalGems < skin.price) return {};
+          const newTotal = state.totalGems - skin.price;
+          const newUnlocked = [...state.unlockedSkins, skinId];
+          setLocalStorage('totalGems', newTotal);
+          setLocalStorage('unlockedSkins', newUnlocked);
+          setLocalStorage('selectedSkin', skinId);
+          success = true;
+          return {
+            totalGems: newTotal,
+            unlockedSkins: newUnlocked,
+            selectedSkin: skinId,
+          };
+        });
+        return success;
+      },
+      selectSkin: (skinId) => {
+        set((state) => {
+          if (!state.unlockedSkins.includes(skinId)) return {};
+          setLocalStorage('selectedSkin', skinId);
+          return { selectedSkin: skinId };
+        });
+      },
 
       // Games played
       gamesPlayed: getLocalStorage('gamesPlayed') ?? 0,
